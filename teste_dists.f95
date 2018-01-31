@@ -1,21 +1,28 @@
 PROGRAM teste_dists
 
     !++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
-    !Criação da subrotina do cálculo de distância euclideana                     !
+    !Programa de teste e comparação de duas diferentes distâncias                !
     !Orientador: Cosme Ferreira da Ponte Neto                                    !
     !Aluno: Victor Ribeiro Carreira                                              !
-    !Este programa validar a subrotina mahalanobeana                             !
     !Categoria: classificador                                                    !
-    !Subrotina mahalanobeana                                                     !
+    !Subrotina Teste                                                             !
     !Para usar compilação com flags utilize:                                     !
     !gfortran -fbounds-check -fbacktrace -Wall -Wextra -pedantic                 !
     !"pasta/subpasta/nomedopragrama.f95" -o nomedoexecutável                     !
     !++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++!
 
-
-                          !lito1 nuvem de pontos
-                          !lito2 um ponto no espaço
-                          !np; número de pontos da nuvem
+                          !***********TABELA DE VARIÁVEIS***********!
+                          !lito1: nuvem de pontos de treinamento    !
+                          !lito2: o que vai ser classificado        ! 
+                          !       (ponto ou nuvem)                  !
+                          !np: número de pontos da/das nuvem/nuvens !
+                          !r: raio do circulo                       !
+                          !a: eixo menor da elipse                  !
+                          !b: eixo maior da elipse                  !
+                          !theta: angulo entre os eixos             !
+                          !*min: valor minimo de uma variavel       !  
+                          !*max: valor maximo de uma variavel       !
+                          !-----------------------------------------!
 
   IMPLICIT NONE
 
@@ -28,32 +35,33 @@ PROGRAM teste_dists
   REAL(KIND=DP)::r,theta, a, b
   REAL(KIND=DP)::maha, eucli
   REAL(KIND=DP), PARAMETER::pi=3.141592653, rmax=5.0, rmin=0.0, thetamin=0.0, &
-  thetamax=2.0*pi, amax=0.1, amin=0.0, bmax=0.1,bmin=0.0
+  thetamax=2.0*pi, amax=20, amin=0.0, bmax=10,bmin=0.0
 
   REAL(KIND=DP), ALLOCATABLE, DIMENSION(:,:)::lito1, lito2
 
-  ALLOCATE(lito1(np,2), lito2(1,2))
+  ALLOCATE(lito1(np,2), lito2(np,2))
 
 
   lito1=0d0  !Zerando a matriz
   lito2=0d0  !Zerando a matriz
 
   !Defindo as coordenadas do ponto no espaço (Centro do sistema de coordenadas)
-  lito2(1,1)=100d0 ! atribuindo o valor zero a cooredentada x
-  lito2(1,2)=100d0 ! atribuindo o valor zero a cooredentada y
+  !lito2(1,1)=100d0 ! atribuindo o valor zero a cooredentada x
+  !lito2(1,2)=100d0 ! atribuindo o valor zero a cooredentada y
 
 
-   OPEN(1,FILE='teste_nuvem.txt')
+   OPEN(1,FILE='teste_nuvem_T.txt')
    OPEN(2,FILE='teste_ponto.txt')
+   OPEN(3,FILE='teste_nuvem_C.txt')
 
 
-   ! Criando a nuvem de pontos no espaço em lito1 ELISE
+   ! Criando a nuvem de pontos no espaço em lito1 (conjunto de treinamento)
    DO i=1,np
      a=(amax-amin)*RAND()+amin !Equação padrão para sortear números aleatórios em uma dist regular
      b=(bmax-bmin)*RAND()+bmin
      theta=(thetamax-thetamin)*RAND()+thetamin !Equação padrão para sortear números aleatórios em uma dist regular
-     lito1(i,1)=a*COS(theta) + 100.0 !Preenche a coordenada x e desloca o centro para 100 unidades em x
-     lito1(i,2)=b*SIN(theta) + 100.0 !Preenche a coordenada y e desloca o centro em 100 unidade em y
+     lito1(i,1)=a*COS(theta) + 40.0 !Preenche a coordenada x e desloca o centro para 100 unidades em x
+     lito1(i,2)=b*SIN(theta) + 20.0 !Preenche a coordenada y e desloca o centro em 100 unidade em y
      WRITE(1,FMT=*)lito1(i,1),lito1(i,2)
    END DO
 
@@ -79,13 +87,29 @@ PROGRAM teste_dists
     ! WRITE(1,FMT=*)lito1(j,1),lito1(j,2)
    !END DO
 
-    WRITE(2,FMT=*)lito2(1,1),lito2(1,2)
+   !Transformando o lito2 em uma nuvem de pontos 
+   DO i=1,np
+     a=(amax-amin)*RAND()+amin !Equação padrão para sortear números aleatórios em uma dist regular
+     b=(bmax-bmin)*RAND()+bmin
+     theta=(thetamax-thetamin)*RAND()+thetamin !Equação padrão para sortear números aleatórios em uma dist regular
+     lito2(i,1)=a*COS(theta) + 10.0 !Preenche a coordenada x e desloca o centro para 100 unidades em x
+     lito2(i,2)=b*SIN(theta) + 10.0 !Preenche a coordenada y e desloca o centro em 100 unidade em y
+     WRITE(3,FMT=*)lito2(i,1),lito2(i,2)
+   END DO
 
+
+   !Gravando os arquivos de saída (lito2 é um ponto)
+    !WRITE(2,FMT=*)lito2(1,1),lito2(1,2)
+
+   !Gravando os arquivos de saída (lito2 é uma nuvem)
+    WRITE(3,FMT=*)lito2(1,1),lito2(1,2)
+    
     CLOSE(1)
     CLOSE(2)
+    CLOSE(3)
 
-
-  21 FORMAT(15(F4.2,2x))
+  ! Formatos dos arquivos de saida  
+  !21 FORMAT(15(F4.2,2x))
 
   CALL euclideana(lito1,lito2,eucli)
   CALL mahalanobeana(lito1,np,lito2,1,2,maha)
