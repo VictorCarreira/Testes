@@ -13,14 +13,14 @@ PROGRAM teste_dists
 
                           !***********TABELA DE VARIÁVEIS***********!
                           !lito1: nuvem de pontos de treinamento    !
-                          !lito2: o que vai ser classificado        ! 
+                          !lito2: o que vai ser classificado        !
                           !       (ponto ou nuvem)                  !
                           !np: número de pontos da/das nuvem/nuvens !
                           !r: raio do circulo                       !
                           !a: eixo menor da elipse                  !
                           !b: eixo maior da elipse                  !
                           !theta: angulo entre os eixos             !
-                          !*min: valor minimo de uma variavel       !  
+                          !*min: valor minimo de uma variavel       !
                           !*max: valor maximo de uma variavel       !
                           !-----------------------------------------!
 
@@ -30,7 +30,7 @@ PROGRAM teste_dists
   INTEGER, PARAMETER::DP = SELECTED_REAL_KIND(12,100)
 
   INTEGER(KIND=SP):: i,j
-  INTEGER(KIND=DP), PARAMETER::np=359
+  INTEGER(KIND=DP), PARAMETER::np=120000
 
   REAL(KIND=DP)::r,theta, a, b
   REAL(KIND=DP)::maha, eucli
@@ -57,11 +57,11 @@ PROGRAM teste_dists
 
    ! Criando a nuvem de pontos no espaço em lito1 (conjunto de treinamento)
    DO i=1,np
-     a=(amax-amin)*RAND()+amin !Equação padrão para sortear números aleatórios em uma dist regular
-     b=(bmax-bmin)*RAND()+bmin
+     a=(amax-amin)*1+amin !Equação padrão para sortear números aleatórios em uma dist regular
+     b=(bmax-bmin)*1+bmin
      theta=(thetamax-thetamin)*RAND()+thetamin !Equação padrão para sortear números aleatórios em uma dist regular
-     lito1(i,1)=a*COS(theta) + 40.0 !Preenche a coordenada x e desloca o centro para 100 unidades em x
-     lito1(i,2)=b*SIN(theta) + 20.0 !Preenche a coordenada y e desloca o centro em 100 unidade em y
+     lito1(i,1)=a*COS(theta) + 15.0 !Preenche a coordenada x e desloca o centro para 100 unidades em x
+     lito1(i,2)=b*SIN(theta) + 15.0 !Preenche a coordenada y e desloca o centro em 100 unidade em y
      WRITE(1,FMT=*)lito1(i,1),lito1(i,2)
    END DO
 
@@ -87,13 +87,13 @@ PROGRAM teste_dists
     ! WRITE(1,FMT=*)lito1(j,1),lito1(j,2)
    !END DO
 
-   !Transformando o lito2 em uma nuvem de pontos 
+   !Transformando o lito2 em uma nuvem de pontos
    DO i=1,np
-     a=(amax-amin)*RAND()+amin !Equação padrão para sortear números aleatórios em uma dist regular
-     b=(bmax-bmin)*RAND()+bmin
+     a=(amax-amin)*1+amin !Equação padrão para sortear números aleatórios em uma dist regular
+     b=(bmax-bmin)*1+bmin
      theta=(thetamax-thetamin)*RAND()+thetamin !Equação padrão para sortear números aleatórios em uma dist regular
-     lito2(i,1)=a*COS(theta) + 10.0 !Preenche a coordenada x e desloca o centro para 100 unidades em x
-     lito2(i,2)=b*SIN(theta) + 10.0 !Preenche a coordenada y e desloca o centro em 100 unidade em y
+     lito2(i,1)=a*COS(theta) + 15.0 !Preenche a coordenada x e desloca o centro para 100 unidades em x
+     lito2(i,2)=b*SIN(theta) + 15.0 !Preenche a coordenada y e desloca o centro em 100 unidade em y
      WRITE(3,FMT=*)lito2(i,1),lito2(i,2)
    END DO
 
@@ -103,12 +103,12 @@ PROGRAM teste_dists
 
    !Gravando os arquivos de saída (lito2 é uma nuvem)
     WRITE(3,FMT=*)lito2(1,1),lito2(1,2)
-    
+
     CLOSE(1)
     CLOSE(2)
     CLOSE(3)
 
-  ! Formatos dos arquivos de saida  
+  ! Formatos dos arquivos de saida
   !21 FORMAT(15(F4.2,2x))
 
   CALL euclideana(lito1,lito2,eucli)
