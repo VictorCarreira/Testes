@@ -30,12 +30,12 @@ PROGRAM teste_dists
   INTEGER, PARAMETER::DP = SELECTED_REAL_KIND(12,100)
 
   INTEGER(KIND=SP):: i,j
-  INTEGER(KIND=DP), PARAMETER::np=120000
+  INTEGER(KIND=DP), PARAMETER::np=1200
 
   REAL(KIND=DP)::r,theta, a, b
   REAL(KIND=DP)::maha, eucli
   REAL(KIND=DP), PARAMETER::pi=3.141592653, rmax=5.0, rmin=0.0, thetamin=0.0, &
-  thetamax=2.0*pi, amax=20, amin=0.0, bmax=10,bmin=0.0
+  thetamax=2.0*pi, amax=10, amin=1.0, bmax=5,bmin=2.0
 
   REAL(KIND=DP), ALLOCATABLE, DIMENSION(:,:)::lito1, lito2
 
@@ -53,14 +53,16 @@ PROGRAM teste_dists
    OPEN(1,FILE='teste_nuvem_T.txt')
    OPEN(2,FILE='teste_ponto.txt')
    OPEN(3,FILE='teste_nuvem_C.txt')
+   OPEN(4,FILE='Parametros.txt')
+   
 
 
    ! Criando a nuvem de pontos no espaço em lito1 (conjunto de treinamento)
    DO i=1,np
-     a=(amax-amin)*1+amin !Equação padrão para sortear números aleatórios em uma dist regular
-     b=(bmax-bmin)*1+bmin
+     a=(amax-amin)*RAND()+amin !Equação padrão para sortear números aleatórios em uma dist regular
+     b=(bmax-bmin)*RAND()+bmin
      theta=(thetamax-thetamin)*RAND()+thetamin !Equação padrão para sortear números aleatórios em uma dist regular
-     lito1(i,1)=a*COS(theta) + 15.0 !Preenche a coordenada x e desloca o centro para 100 unidades em x
+     lito1(i,1)=a*COS(theta) + 1.0 !Preenche a coordenada x e desloca o centro para 100 unidades em x
      lito1(i,2)=b*SIN(theta) + 15.0 !Preenche a coordenada y e desloca o centro em 100 unidade em y
      WRITE(1,FMT=*)lito1(i,1),lito1(i,2)
    END DO
@@ -89,11 +91,11 @@ PROGRAM teste_dists
 
    !Transformando o lito2 em uma nuvem de pontos
    DO i=1,np
-     a=(amax-amin)*1+amin !Equação padrão para sortear números aleatórios em uma dist regular
-     b=(bmax-bmin)*1+bmin
+     a=(amax-amin)*RAND()+amin !Equação padrão para sortear números aleatórios em uma dist regular
+     b=(bmax-bmin)*RAND()+bmin
      theta=(thetamax-thetamin)*RAND()+thetamin !Equação padrão para sortear números aleatórios em uma dist regular
-     lito2(i,1)=a*COS(theta) + 15.0 !Preenche a coordenada x e desloca o centro para 100 unidades em x
-     lito2(i,2)=b*SIN(theta) + 15.0 !Preenche a coordenada y e desloca o centro em 100 unidade em y
+     lito2(i,1)=a*COS(theta) + 10.0 !Preenche a coordenada x e desloca o centro para 100 unidades em x
+     lito2(i,2)=b*SIN(theta) + 5.0 !Preenche a coordenada y e desloca o centro em 100 unidade em y
      WRITE(3,FMT=*)lito2(i,1),lito2(i,2)
    END DO
 
@@ -103,13 +105,28 @@ PROGRAM teste_dists
 
    !Gravando os arquivos de saída (lito2 é uma nuvem)
     WRITE(3,FMT=*)lito2(1,1),lito2(1,2)
+    !Gravando os parâmetros do modelo
+    WRITE(4,FMT=*)'Parâmetros do modelo'
+    WRITE(4,FMT=*)
+    WRITE(4,FMT=21)'rmax=',rmax
+    WRITE(4,FMT=21)'rmin=',rmin
+    WRITE(4,FMT=21)'thetamin=',thetamin
+    WRITE(4,FMT=21)'thetamax=',thetamax
+    WRITE(4,FMT=21)'amax=',amax
+    WRITE(4,FMT=21)'amin=',amin
+    WRITE(4,FMT=21)'bmax=', bmax
+    WRITE(4,FMT=21)'bmin=',bmin
+    WRITE(4,FMT=*)'----------------------'
+    WRITE(4,FMT=22)'número de pontos=',np
 
     CLOSE(1)
     CLOSE(2)
     CLOSE(3)
+    CLOSE(4)
 
   ! Formatos dos arquivos de saida
-  !21 FORMAT(15(F4.2,2x))
+  21 FORMAT(A9,2x,E12.2)
+  22 FORMAT(A20,2x,I4)
 
   CALL euclideana(lito1,lito2,eucli)
   CALL mahalanobeana(lito1,np,lito2,1,2,maha)
@@ -131,7 +148,7 @@ PROGRAM teste_dists
 
    REAL(KIND=DP), DIMENSION(:,:), INTENT(IN)::lito1, lito2
    REAL(KIND=DP), INTENT(OUT):: eucli
-   REAL(KIND=DP)::media1
+   REAL(KIND=DP)::media1, media2
 
    INTEGER(KIND=SP):: k
 
@@ -145,11 +162,15 @@ PROGRAM teste_dists
 
     DO k=1,SIZE(lito1(1,:))  ! Inicia o laço da primeira até a última propriedade que é dado pelo size de lito
      media1=0d0 !zera as variáveis
+     media2=0d0 !zera as variáveis para a cálculo do centróide 2
      media1=SUM(lito1(:,k))/SIZE(lito1(:,k)) !calcula as médias para as k propriedades
-     eucli= eucli + (lito2(1,k)-media1)**2 ! Cálculo da medida de semelhança de euclides
+     media2=SUM(lito2(:,k))/SIZE(lito2(:,k)) !calcula as médias para k propriedades para uma segunda nuvem de pontos
+     !eucli= eucli + (lito2(1,k)-media1)**2 ! Cálculo da medida de semelhança de euclides para um conjunto de pontos e um centróide
+     eucli= eucli + (media2-media1)**2
     END DO ! Final do laço das k propriedades
-
     eucli=SQRT(eucli)
+
+  
   END SUBROUTINE euclideana
 
   SUBROUTINE mahalanobeana(g11,np1,g22,np2,ndim,dist)
