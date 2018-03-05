@@ -31,7 +31,7 @@ PROGRAM teste_dists
 
   INTEGER(KIND=SP):: i, ic1, ic2, ic3
   INTEGER(KIND=SP)::np1, np2, np3
-  INTEGER(KIND=SP), PARAMETER:: semente=5
+  INTEGER(KIND=SP), PARAMETER:: semente=17
 
   REAL(KIND=DP)::inicio,final,x, px, py, fx
   REAL(KIND=DP)::mahaI, eucliI, mahaII, eucliII, L, LXmax, LXmin, LYmax, LYmin
@@ -56,7 +56,7 @@ PROGRAM teste_dists
    OPEN(1,FILE='teste_nuvem_T.txt')
    OPEN(2,FILE='teste_nuvem_D.txt')
    OPEN(3,FILE='teste_nuvem_C.txt')
-   OPEN(4,FILE='Parametros.txt')
+   OPEN(4,FILE='AnaliseIII.txt')
    
 
    !Criando uma semente para o gerador de números aleatórios
@@ -74,36 +74,36 @@ PROGRAM teste_dists
    LYmin=-b !Lado mínimo de um retângulo (válido somente para uma elipse) 
 
 
-  ! Escrevendo os lados do quadrado 1
-  DO i=1,np1
-   lito1(i,1)=(L-rmin)*RAND()+rmin-rmax 
-   lito1(i,2)=(L-rmin)*RAND()+rmin-rmax
-  END DO
-
-  !Escrevendo os lados do retângulo 1
+  ! Escrevendo os lados do quadrado 1 sorteio
   !DO i=1,np1
-  ! lito1(i,1)=(LXmax-LXmin)*RAND()+LXmin 
-  ! lito1(i,2)=(LYmax-LYmin)*RAND()+LYmin
+  ! lito1(i,1)=(L-rmin)*RAND()+rmin-rmax 
+  ! lito1(i,2)=(L-rmin)*RAND()+rmin-rmax
   !END DO
 
+
+  !Escrevendo os lados do retângulo 1 e sorteando os dados
+  DO i=1,np1
+   lito1(i,1)=(LXmax-LXmin)*RAND()+LXmin 
+   lito1(i,2)=(LYmax-LYmin)*RAND()+LYmin
+  END DO
+
+!Criando um contador para a circunferência/Elipse 1
   ic1=0
   DO i=1,np1
-   IF (DSQRT(lito1(i,1)**2+lito1(i,2)**2) <= L/2.0) THEN ! válido para a circunferências. 
-   ! px=lito1(i,1)
-   ! py=lito1(i,2)
-   ! fx=b*DSQRT(1.0-px**2.0/a**2.0)
-   ! IF (py <= fx .AND. py >= -fx) THEN  !Válido para a elipse
+   !IF (DSQRT(lito1(i,1)**2+lito1(i,2)**2) <= L/2.0) THEN ! válido para a circunferências. 
+    px=lito1(i,1)
+    py=lito1(i,2)
+    fx=b*DSQRT(1.0-px**2.0/a**2.0)
+    IF (py <= fx .AND. py >= -fx) THEN  !Válido para a elipse
      ic1=ic1+1!Contar quantos foram considerados
    END IF
   END DO 
 
-  print*,'ic1=',ic1
 !Escrevendo os lados do quadrado 2
 DO i=1,np2
   lito2(i,1)=(L-rmin)*RAND()+rmin-rmax 
   lito2(i,2)=(L-rmin)*RAND()+rmin-rmax
 END DO
-
 !Criando um contador para a circunferência 2 
  ic2=0
  DO i=1,np2
@@ -111,15 +111,14 @@ END DO
    ic2=ic2+1!Contar quantos foram considerados
   END IF
  END DO 
-print*,'ic2=',ic2
+
+
+
 !Escrevendo os lados do quadrado 3
 DO i=1,np3
  lito3(i,1)=(L-rmin)*RAND()+rmin-rmax 
  lito3(i,2)=(L-rmin)*RAND()+rmin-rmax
 END DO
-
-
-
 !Criando um contador para a circunferência 3
  ic3=0
  DO i=1,np3
@@ -127,7 +126,7 @@ END DO
    ic3=ic3+1!Contar quantos foram considerados
   END IF
  END DO 
- print*,'ic3=',ic3
+
   
 
  ALLOCATE(lito11(ic1,2), lito22(ic2,2), lito33(ic3,2))
@@ -138,11 +137,11 @@ END DO
  !Escrevendo os dados da nuvem 1 em uma elipse ou circunferência (basta descomentar um IF e comentar o outro)
   ic1=0
    DO i=1,np1
-   IF (DSQRT(lito1(i,1)**2+lito1(i,2)**2) <= L/2.0) THEN ! Circunferência
-   !px=lito1(i,1)
-   !py=lito1(i,2)
-   !fx=b*DSQRT(1.0-px**2.0/a**2.0)
-   ! IF (py <= fx .AND. py >= -fx) THEN
+   !IF (DSQRT(lito1(i,1)**2+lito1(i,2)**2) <= L/2.0) THEN ! Circunferência
+   px=lito1(i,1)
+   py=lito1(i,2)
+   fx=b*DSQRT(1.0-px**2.0/a**2.0)
+   IF (py <= fx .AND. py >= -fx) THEN !Elipse
      ic1=ic1+1!Contar quantos foram considerados
      lito11(ic1,1)=lito1(i,1)+10.0! desloca o centro em 1 unidades
      lito11(ic1,2)=lito1(i,2)+15.0! descloca o centro em 15 unidades
@@ -178,23 +177,6 @@ END DO
   np2=ic2
   np3=ic3
 
-    !Gravando os parâmetros do modelo
-    WRITE(4,FMT=*)'Parâmetros do modelo'
-    WRITE(4,FMT=*)
-    WRITE(4,FMT=21)'rmax=',rmax
-    WRITE(4,FMT=21)'rmin=',rmin
-    WRITE(4,FMT=21)'thetamin=',thetamin
-    WRITE(4,FMT=21)'thetamax=',thetamax
-    WRITE(4,FMT=21)'a=',a
-    WRITE(4,FMT=21)'b=', b
-    WRITE(4,FMT=*)'----------------------'
-    WRITE(4,FMT=22)'cluster 1=',np1
-    WRITE(4,FMT=22)'cluster 2=',np2
-
-
-  ! Formatos dos arquivos de saida
-  21 FORMAT(A9,2x,E12.2)
-  22 FORMAT(A20,2x,I10)
 
   CALL euclideana(lito11,lito22,eucliI)
   CALL euclideana(lito11,lito33,eucliII)
@@ -202,9 +184,11 @@ END DO
   CALL mahalanobeana(lito11,np1,lito33,np3,2,mahaII)
 
   PRINT*,'dist de euclides (1-2)=', eucliI
-  PRINT*, 'dist de maha (1-2)=', mahaII
+  PRINT*, 'dist de maha (1-2)=', mahaI
   PRINT*,'dist de euclides (1-3)=', eucliII
   PRINT*, 'dist de maha (1-3)=', mahaII
+
+  CALL saida
 
   CLOSE(1)
   CLOSE(2)
@@ -215,6 +199,31 @@ END DO
   PRINT*,'tempo de máquina=',final-inicio
   !*******************************************************************************************!
   CONTAINS
+
+  SUBROUTINE saida
+
+    ! Formatos dos arquivos de saida
+     21 FORMAT(A22,2x,E12.3)
+     22 FORMAT(A20,2x,I10)
+    !Gravando os parâmetros do modelo
+    WRITE(4,FMT=*)'-------Parâmetros do modelo-------'
+    WRITE(4,FMT=21)'rmax=',rmax
+    WRITE(4,FMT=21)'rmin=',rmin
+    WRITE(4,FMT=21)'thetamin=',thetamin
+    WRITE(4,FMT=21)'thetamax=',thetamax
+    WRITE(4,FMT=21)'a=',a
+    WRITE(4,FMT=21)'b=',b
+    WRITE(4,FMT=22)'semente randômica=',semente
+    WRITE(4,FMT=*)'---------------Dados--------------'
+    WRITE(4,FMT=22)'cluster 1=',np1
+    WRITE(4,FMT=22)'cluster 2=',np2
+    WRITE(4,FMT=22)'cluster 3=',np3
+    WRITE(4,FMT=*)'------------Distâncias------------'
+    WRITE(4,FMT=21)'Euclideana(I-II)=', eucliI
+    WRITE(4,FMT=21)'Mahalanobeana(I-II)=', mahaI
+    WRITE(4,FMT=21)'Euclideana(I-III)=', eucliII
+    WRITE(4,FMT=21)'Mahalanobeana(I-III)=', mahaII
+  END SUBROUTINE saida 
 
   SUBROUTINE euclideana(lito1,lito2,eucli)
 
