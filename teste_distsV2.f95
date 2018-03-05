@@ -31,19 +31,19 @@ PROGRAM teste_dists
 
   INTEGER(KIND=SP):: i,j, ic1, ic2
   INTEGER(KIND=SP)::np1, np2
-  INTEGER(KIND=SP), PARAMETER:: semente=9
+  INTEGER(KIND=SP), PARAMETER:: semente=5
 
   REAL(KIND=DP)::r,theta, a, b, inicio,final,x
-  REAL(KIND=DP)::maha, eucli, L
-  REAL(KIND=DP), PARAMETER::pi=3.141592653, rmax=5.0, rmin=0.0, thetamin=0.0, &
-  thetamax=2.0*pi, amax=10, amin=1.0, bmax=5,bmin=2.0
+  REAL(KIND=DP)::maha, eucli, L, Lmax, Lmin
+  REAL(KIND=DP), PARAMETER::pi=3.141592653, rmax=3.0, rmin=0.0, thetamin=0.0, &
+  thetamax=5.0*pi, amax=15.0, amin=3.0, bmax=5,bmin=0.0
 
   REAL(KIND=DP), ALLOCATABLE, DIMENSION(:,:)::lito1, lito2, lito11, lito22
   
   CALL CPU_TIME(inicio)
 
-  np1=1200
-  np2=1200
+  np1=5000
+  np2=500
 
   ALLOCATE(lito1(np1,2), lito2(np2,2))
 
@@ -61,7 +61,7 @@ PROGRAM teste_dists
    OPEN(4,FILE='Parametros.txt')
    
    ! Criando a nuvem de pontos, em elipse, no espaço em lito1 (conjunto de treinamento)
-   !DO i=1,np
+   !DO i=1,np1
    !  a=(amax-amin)*RAND()+amin !Equação padrão para sortear números aleatórios em uma dist regular
    !  b=(bmax-bmin)*RAND()+bmin
    !  theta=(thetamax-thetamin)*RAND()+thetamin !Equação padrão para sortear números aleatórios em uma dist regular
@@ -77,6 +77,7 @@ PROGRAM teste_dists
    DO i=1,semente
     x=RAND()
    END DO  
+
    !DO i=1,np1
    ! r=(rmax-rmin)*RAND()+rmin !Equação padrão para sortear números aleatórios em uma dist regular
    ! theta=(thetamax-thetamin)*RAND()+thetamin !Equação padrão para sortear números aleatórios em uma dist regular
@@ -85,30 +86,35 @@ PROGRAM teste_dists
    ! WRITE(1,FMT=*)lito1(i,1),lito1(i,2)
    !END DO
 
-  !Corrigindo o vício do sortei aleatório
-
-   
-  L=2.0*rmax
+  !Corrigindo o vício do sorteio aleatório
+   L=2.0*rmax ! lado de um quadrado (válido somente para circunferências)
+   Lmax=2.0*amax !Lado máximo de um retângulo (válido somente para uma elipse)
+   Lmin=2.0*amin !Lado mínimo de um retângulo (válido somente para uma elipse) 
  
   ! circunferência 1
+  !DO i=1,np1
+   !lito1(i,1)=(L-rmin)*RAND()+rmin-rmax 
+   !lito1(i,2)=(L-rmin)*RAND()+rmin-rmax
+  !END DO
+
+  !Elispe 1
   DO i=1,np1
-   lito1(i,1)=(L-rmin)*RAND()+rmin-rmax 
-   lito1(i,2)=(L-rmin)*RAND()+rmin-rmax
+   lito1(i,1)=(Lmax-amax)*RAND()+amin-amax 
+   lito1(i,2)=(Lmin-amin)*RAND()+amin-amax
   END DO
+
  
   ic1=0
   DO i=1,np1
-   IF (DSQRT(lito1(i,1)**2+lito1(i,2)**2) <= L/2.0) THEN
+   !IF (DSQRT(lito1(i,1)**2+lito1(i,2)**2) <= L/2.0) THEN ! válido para a circunferências. Seleciona os dados de acordo com a hipotenusa
+   IF (DSQRT(lito1(i,1)**2.0*lito1(i,2)**2-lito1(i,2)**2*RANGE(lito1(i,2))/lito1(i,1)**2.0) <= Lmax/2.0 .AND. & 
+   DSQRT(lito1(i,1)**2.0*lito1(i,2)**2-lito1(i,2)**2*RANGE(lito1(i,2))/lito1(i,1)**2.0) >= Lmin/2.0) THEN  !Válido para a elipse
     ic1=ic1+1!Contar quantos foram considerados
   !  lito1(ic1,1)=lito1(i,1)+1.0! desloca o centro em 1 unidades
   !  lito1(ic1,2)=lito1(i,2)+15.0! descloca o centro em 15 unidades
   !  WRITE(1,FMT=*)lito1(i,1),lito1(i,2)
    END IF
   END DO 
-
-
-
-
 
 !Circunferência 2
   DO i=1,np2
@@ -127,17 +133,17 @@ PROGRAM teste_dists
  END DO 
   
 
- 
-
  ALLOCATE(lito11(ic1,2), lito22(ic2,2))
  lito11=0d0
  lito22=0d0
 
  ic1=0
  DO i=1,np1
-  IF (DSQRT(lito1(i,1)**2+lito1(i,2)**2) <= L/2.0) THEN
+  !IF (DSQRT(lito1(i,1)**2+lito1(i,2)**2) <= L/2.0) THEN ! Circunferência
+  IF (DSQRT(lito1(i,1)**2.0*lito1(i,2)**2-lito1(i,2)**2*RANGE(lito1(i,2))/lito1(i,1)**2.0) <= Lmax/2.0 .AND. & 
+  DSQRT(lito1(i,1)**2.0*lito1(i,2)**2-lito1(i,2)**2*RANGE(lito1(i,2))/lito1(i,1)**2.0) <= Lmin/2.0) THEN
    ic1=ic1+1!Contar quantos foram considerados
-   lito11(ic1,1)=lito1(i,1)+6.0! desloca o centro em 1 unidades
+   lito11(ic1,1)=lito1(i,1)+10.0! desloca o centro em 1 unidades
    lito11(ic1,2)=lito1(i,2)+21.0! descloca o centro em 15 unidades
     WRITE(1,FMT=*)lito11(ic1,1),lito11(ic1,2)
   END IF
@@ -148,7 +154,7 @@ PROGRAM teste_dists
  DO i=1,np2
   IF (DSQRT(lito2(i,1)**2+lito2(i,2)**2) <= L/2.0) THEN
    ic2=ic2+1!Contar quantos foram considerados
-   lito22(ic2,1)=lito2(i,1)+10.0! desloca o centro em 10 unidades
+   lito22(ic2,1)=lito2(i,1)+1.0! desloca o centro em 10 unidades
    lito22(ic2,2)=lito2(i,2)+5.0! descloca o centro em 5 unidades
    WRITE(3,FMT=*)lito22(ic2,1),lito22(ic2,2)
   END IF
