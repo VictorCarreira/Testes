@@ -1,0 +1,15 @@
+ -------Parâmetros do modelo-------
+                 rmax=     0.300E+01
+                 rmin=     0.000E+00
+             thetamin=     0.000E+00
+             thetamax=     0.157E+02
+ semente randômica=           5
+ ---------------Dados--------------
+          cluster 1=         404
+          cluster 2=         383
+          cluster 3=         397
+ ------------Distâncias------------
+     Euclideana(I-II)=     0.200E+02
+  Mahalanobeana(I-II)=     0.138E+02
+    Euclideana(I-III)=     0.197E+02
+ Mahalanobeana(I-III)=     0.129E+02
